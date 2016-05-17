@@ -36,9 +36,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// import { merge } from 'ramda'
-// import uuid from 'uuid'
-
 var Consul = function() {
   function Consul() {
     _classCallCheck(this, Consul);
@@ -48,7 +45,7 @@ var Consul = function() {
       port: '8500',
       promisify: true
     };
-    this.client = (0, _consul2.default)(options);
+    this.client = (0, _consul2.default)(this.options);
   }
 
   _createClass(Consul, [ {
@@ -59,7 +56,7 @@ var Consul = function() {
           switch (_context.prev = _context.next) {
             case 0:
               _context.next = 2;
-              return regeneratorRuntime.awrap(this.consul.kv.set(id, value));
+              return regeneratorRuntime.awrap(this.client.kv.set(id, value));
 
             case 2:
             case 'end':
@@ -76,7 +73,7 @@ var Consul = function() {
           switch (_context2.prev = _context2.next) {
             case 0:
               _context2.next = 2;
-              return regeneratorRuntime.awrap(this.consul.kv.get(id));
+              return regeneratorRuntime.awrap(this.client.kv.get(id));
 
             case 2:
               return _context2.abrupt('return', _context2.sent);
@@ -96,7 +93,7 @@ var Consul = function() {
           switch (_context3.prev = _context3.next) {
             case 0:
               _context3.next = 2;
-              return regeneratorRuntime.awrap(this.consul.kv.del(id));
+              return regeneratorRuntime.awrap(this.client.kv.del(id));
 
             case 2:
               return _context3.abrupt('return', _context3.sent);
