@@ -13,12 +13,14 @@ export default class Consul {
   }
 
   async set(id, value) {
-    // TODO: spec key-value space schema
     await this.consul.kv.set(id, value)
   }
 
   async get(id) {
-    // TODO: spec key-value space schema
     return await this.consul.kv.get(id)
+  }
+
+  async delete(id) {
+    return await this.consul.kv.del(id)
   }
 }

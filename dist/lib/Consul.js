@@ -88,6 +88,26 @@ var Consul = function() {
         }
       }, null, this);
     }
+  }, {
+    key: 'delete',
+    value: function _delete(id) {
+      return regeneratorRuntime.async(function _delete$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return regeneratorRuntime.awrap(this.consul.kv.del(id));
+
+            case 2:
+              return _context3.abrupt('return', _context3.sent);
+
+            case 3:
+            case 'end':
+              return _context3.stop();
+          }
+        }
+      }, null, this);
+    }
   } ]);
 
   return Consul;
