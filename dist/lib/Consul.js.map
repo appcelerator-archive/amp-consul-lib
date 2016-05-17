@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "sources": [
+    "Consul.js"
+  ],
+  "names": [],
+  "mappings": ";;;;;;;;AAAA;;;;;;;;;;;IAIqB,M;AACnB,oBAAc;AAAA;;AACZ,SAAK,OAAL,GAAe;AACb,YAAM,QADO;AAEb,YAAM,MAFO;AAGb,iBAAW;AAHE,KAAf;AAKA,SAAK,MAAL,GAAc,sBAAO,OAAP,CAAd;AACD;;;;wBAES,E,EAAI,K;;;;;;8CAEN,KAAK,MAAL,CAAY,EAAZ,CAAe,GAAf,CAAmB,EAAnB,EAAuB,KAAvB,C;;;;;;;;;;;wBAGE,E;;;;;;8CAEK,KAAK,MAAL,CAAY,EAAZ,CAAe,GAAf,CAAmB,EAAnB,C;;;;;;;;;;;;;;;;;kBAjBI,M",
+  "file": "Consul.js",
+  "sourcesContent": [
+    "import consul from 'consul';\n// import { merge } from 'ramda'\n// import uuid from 'uuid'\n\nexport default class Consul {\n  constructor() {\n    this.options = {\n      host: 'consul',\n      port: '8500',\n      promisify: true\n    }\n    this.client = consul(options)\n  }\n\n  async set(id, value) {\n    // TODO: spec key-value space schema\n    await this.consul.kv.set(id, value)\n  }\n\n  async get(id) {\n    // TODO: spec key-value space schema\n    return await this.consul.kv.get(id)\n  }\n}\n"
+  ]
+}
