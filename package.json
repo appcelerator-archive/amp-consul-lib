@@ -1,7 +1,7 @@
 {
-  "name": "lib1",
+  "name": "amp-consul-lib",
   "version": "0.0.1",
-  "description": "node library package",
+  "description": "amp-consul-lib",
   "scripts": {
     "test": "mocha ./dist/test",
     "lint": "eslint src",
