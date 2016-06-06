@@ -1,9 +1,11 @@
 import consul from 'consul';
 
+const host = process.env.CONSUL ? procecess.env.CONSUL.split(':')[0] : 'consul';
+
 export default class Consul {
   constructor() {
     this.options = {
-      host: 'consul',
+      host,
       port: '8500',
       promisify: true
     }
