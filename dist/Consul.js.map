@@ -1,12 +1,1 @@
-{
-  "version": 3,
-  "sources": [
-    "Consul.js"
-  ],
-  "names": [],
-  "mappings": ";;;;;;;;AAAA;;;;;;;;IAEqB,M;AACnB,oBAAc;AAAA;;AACZ,SAAK,OAAL,GAAe;AACb,YAAM,QADO;AAEb,YAAM,MAFO;AAGb,iBAAW;AAHE,KAAf;AAKA,SAAK,MAAL,GAAc,sBAAO,KAAK,OAAZ,CAAd;AACD;;;;wBAES,E,EAAI,K;;;;;;8CACN,KAAK,MAAL,CAAY,EAAZ,CAAe,GAAf,CAAmB,EAAnB,EAAuB,KAAvB,C;;;;;;;;;;;wBAGE,E;;;;;;8CACK,KAAK,MAAL,CAAY,EAAZ,CAAe,GAAf,CAAmB,EAAnB,C;;;;;;;;;;;;;;4BAGF,E;;;;;;8CACE,KAAK,MAAL,CAAY,EAAZ,CAAe,GAAf,CAAmB,EAAnB,C;;;;;;;;;;;;;;;;;kBAnBI,M",
-  "file": "Consul.js",
-  "sourcesContent": [
-    "import consul from 'consul';\n\nexport default class Consul {\n  constructor() {\n    this.options = {\n      host: 'consul',\n      port: '8500',\n      promisify: true\n    }\n    this.client = consul(this.options)\n  }\n\n  async set(id, value) {\n    await this.client.kv.set(id, value)\n  }\n\n  async get(id) {\n    return await this.client.kv.get(id)\n  }\n\n  async delete(id) {\n    return await this.client.kv.del(id)\n  }\n}\n"
-  ]
-}
+{"version":3,"sources":["Consul.js"],"names":[],"mappings":";;;;;;;;AAAA;;;;;;;;AAEA,IAAM,OAAO,QAAQ,GAAR,CAAY,MAAZ,GAAqB,UAAU,GAAV,CAAc,MAAd,CAAqB,KAArB,CAA2B,GAA3B,EAAgC,CAAhC,CAArB,GAA0D,QAAvE;;IAEqB,M;AACnB,oBAAc;AAAA;;AACZ,SAAK,OAAL,GAAe;AACb,gBADa;AAEb,YAAM,MAFO;AAGb,iBAAW;AAHE,KAAf;AAKA,SAAK,MAAL,GAAc,sBAAO,KAAK,OAAZ,CAAd;AACD;;;;wBAES,E,EAAI,K;;;;;;8CACN,KAAK,MAAL,CAAY,EAAZ,CAAe,GAAf,CAAmB,EAAnB,EAAuB,KAAvB,C;;;;;;;;;;;wBAGE,E;;;;;;8CACK,KAAK,MAAL,CAAY,EAAZ,CAAe,GAAf,CAAmB,EAAnB,C;;;;;;;;;;;;;;4BAGF,E;;;;;;8CACE,KAAK,MAAL,CAAY,EAAZ,CAAe,GAAf,CAAmB,EAAnB,C;;;;;;;;;;;;;;;;;kBAnBI,M","file":"Consul.js","sourcesContent":["import consul from 'consul';\n\nconst host = process.env.CONSUL ? procecess.env.CONSUL.split(':')[0] : 'consul';\n\nexport default class Consul {\n  constructor() {\n    this.options = {\n      host,\n      port: '8500',\n      promisify: true\n    }\n    this.client = consul(this.options)\n  }\n\n  async set(id, value) {\n    await this.client.kv.set(id, value)\n  }\n\n  async get(id) {\n    return await this.client.kv.get(id)\n  }\n\n  async delete(id) {\n    return await this.client.kv.del(id)\n  }\n}\n"]}
