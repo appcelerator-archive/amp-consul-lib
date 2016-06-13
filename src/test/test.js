@@ -1,31 +1,37 @@
+import 'babel-polyfill'
 import 'source-map-support/register';
 import assert from 'assert';
-import consul from '..';
+import { Consul } from '..';
 
 describe('amp-consul-lib', function() {
-  let c = consul()
+  const options = {
+    host: 'consul',
+    port: '8500',
+    promisify: true
+  }
+  let c = new Consul()
 
   it('should store and retrive a value from consul', async function() {
-    let result = await c.kv.set('hello', 'world')
+    let result = await c.set('hello', 'world')
     assert.equal(result, true)
-    result = await c.kv.get('hello')
+    result = await c.get('hello')
     assert.equal(result.Key, 'hello')
     assert.equal(result.Value, 'world')
   })
 
   it('should store and retrive a key value recursively from consul', async function() {
-    let result = await c.kv.set('key1', 'val1')
+    let result = await c.set('key1', 'val1')
     assert.equal(result, true)
-    result = await c.kv.get('key1')
+    result = await c.get('key1')
     assert.equal(result.Key, 'key1')
     assert.equal(result.Value, 'val1')
 
-    result = await c.kv.set('key1/key2', 'val2')
+    result = await c.set('key1/key2', 'val2')
     assert.equal(result, true)
-    result = await c.kv.get('key1/key2')
+    result = await c.get('key1/key2')
     assert.equal(result.Key, 'key1/key2')
 
-    result = await c.kv.get({
+    result = await c.get({
       key: 'key1',
       recurse: true
     })
