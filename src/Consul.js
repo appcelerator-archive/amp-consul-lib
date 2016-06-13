@@ -27,8 +27,20 @@ export default class Consul {
     return await this.client.kv.del(id)
   }
 
+  async set_json(id, json) {
+    await this.client.kv.set(id, JSON.stringify(json))
+  }
+
+  async get_json(id) {
+    let r = await this.client.kv.get(id)
+    if (r) {
+      return JSON.parse(r.Value)
+    }
+    return r
+  }
+
   // update : allow concurrent update of an object using advisory consul test-and-set strategy
-  async update(key, f) {
+  async update_json(key, f) {
     consul_update += 1
     let is_updated
     let val2

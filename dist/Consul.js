@@ -91,16 +91,64 @@ var Consul = function () {
         }
       }, null, this);
     }
+  }, {
+    key: 'set_json',
+    value: function set_json(id, json) {
+      return regeneratorRuntime.async(function set_json$(_context4) {
+        while (1) {
+          switch (_context4.prev = _context4.next) {
+            case 0:
+              _context4.next = 2;
+              return regeneratorRuntime.awrap(this.client.kv.set(id, JSON.stringify(json)));
+
+            case 2:
+            case 'end':
+              return _context4.stop();
+          }
+        }
+      }, null, this);
+    }
+  }, {
+    key: 'get_json',
+    value: function get_json(id) {
+      var r;
+      return regeneratorRuntime.async(function get_json$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              _context5.next = 2;
+              return regeneratorRuntime.awrap(this.client.kv.get(id));
+
+            case 2:
+              r = _context5.sent;
+
+              if (!r) {
+                _context5.next = 5;
+                break;
+              }
+
+              return _context5.abrupt('return', JSON.parse(r.Value));
+
+            case 5:
+              return _context5.abrupt('return', r);
+
+            case 6:
+            case 'end':
+              return _context5.stop();
+          }
+        }
+      }, null, this);
+    }
 
     // update : allow concurrent update of an object using advisory consul test-and-set strategy
 
   }, {
-    key: 'update',
-    value: function update(key, f) {
+    key: 'update_json',
+    value: function update_json(key, f) {
       var is_updated, val2, retry, result, val, cas;
-      return regeneratorRuntime.async(function update$(_context4) {
+      return regeneratorRuntime.async(function update_json$(_context6) {
         while (1) {
-          switch (_context4.prev = _context4.next) {
+          switch (_context6.prev = _context6.next) {
             case 0:
               consul_update += 1;
               is_updated = void 0;
@@ -108,11 +156,11 @@ var Consul = function () {
               retry = 0;
 
             case 4:
-              _context4.next = 6;
+              _context6.next = 6;
               return regeneratorRuntime.awrap(this.client.kv.get(key));
 
             case 6:
-              result = _context4.sent;
+              result = _context6.sent;
               val = null;
               cas = 0;
 
@@ -123,18 +171,18 @@ var Consul = function () {
               val2 = f(val, key);
 
               if (val2) {
-                _context4.next = 13;
+                _context6.next = 13;
                 break;
               }
 
-              return _context4.abrupt('break', 18);
+              return _context6.abrupt('break', 18);
 
             case 13:
-              _context4.next = 15;
+              _context6.next = 15;
               return regeneratorRuntime.awrap(this.client.kv.set({ key: key, value: JSON.stringify(val2), cas: cas }));
 
             case 15:
-              is_updated = _context4.sent;
+              is_updated = _context6.sent;
 
 
               if (!is_updated) {
@@ -149,16 +197,16 @@ var Consul = function () {
 
             case 17:
               if (!is_updated) {
-                _context4.next = 4;
+                _context6.next = 4;
                 break;
               }
 
             case 18:
-              return _context4.abrupt('return', val2);
+              return _context6.abrupt('return', val2);
 
             case 19:
             case 'end':
-              return _context4.stop();
+              return _context6.stop();
           }
         }
       }, null, this);
