@@ -9,6 +9,7 @@
   },
   "main": "./dist",
   "dependencies": {
+    "amp-log-lib": "github:appcelerator/amp-log-lib",
     "atomiq": "^1.0.6",
     "babel-polyfill": "^6.3.14",
     "bunyan": "^1.8.1",
