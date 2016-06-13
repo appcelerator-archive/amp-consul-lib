@@ -3,33 +3,47 @@ import 'source-map-support/register';
 import assert from 'assert';
 import { Consul } from '..';
 
-describe('amp-consul-lib', function() {
-  const options = {
-    host: 'consul',
-    port: '8500',
-    promisify: true
-  }
-  let c = new Consul()
+function sleep(ms) {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, ms);
+  });
+}
 
-  it('should store and retrive a value from consul', async function() {
-    let result = await c.set('hello', 'world')
-    assert.equal(result, true)
+describe('amp-consul-lib', function() {
+  let c = new Consul()
+  before(async () => {
+    console.log ("starting...")
+    let ok
+    do {
+      ok = false
+      try {
+        const h = await c.client.health.node('node1')
+        console.log(h)
+        ok = true
+      } catch (e) {
+        console.log("Error:", e.message)
+      }
+      if (!ok)
+        await sleep(1000)
+    } while (!ok)
+  })
+
+  it('should store and retrieve a value from consul', async function() {
+    let result
+    await c.set('hello', 'world')
     result = await c.get('hello')
-    assert.equal(result.Key, 'hello')
     assert.equal(result.Value, 'world')
   })
 
-  it('should store and retrive a key value recursively from consul', async function() {
-    let result = await c.set('key1', 'val1')
-    assert.equal(result, true)
+  it('should store and retrieve a key value recursively from consul', async function() {
+    let result
+    await c.set('key1', 'val1')
     result = await c.get('key1')
-    assert.equal(result.Key, 'key1')
     assert.equal(result.Value, 'val1')
 
     result = await c.set('key1/key2', 'val2')
-    assert.equal(result, true)
     result = await c.get('key1/key2')
-    assert.equal(result.Key, 'key1/key2')
+    assert.equal(result.Value, 'val2')
 
     result = await c.get({
       key: 'key1',
