@@ -1,0 +1,39 @@
+build:
+  sut:
+    image: appcelerator/docker-toolbox-node
+    environment:
+      DOCKER_HUB_LOGIN:    $$DOCKER_HUB_LOGIN
+      DOCKER_HUB_PASSWORD: $$DOCKER_HUB_PASSWORD
+      DOCKER_HUB_EMAIL:    $$DOCKER_HUB_EMAIL
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+    - docker login -u "$DOCKER_HUB_LOGIN" -p "$DOCKER_HUB_PASSWORD" -e "$DOCKER_HUB_EMAIL"
+    - ./drone.sh
+
+debug: true
+
+cache:
+  mount:
+    - .git
+
+notify:
+  downstream:
+    repositories:
+      - appcelerator/amp-service
+      - appcelerator/amp-service-worker
+    token: $$DRONE_TOKEN
+    fork: true
+    server: http://drone.amp.appcelerator.io:8000
+    when:
+      tag: master
+      success: true
+      event: push
+      repo: appcelerator/amp-log-lib
+
+  slack:
+    webhook_url: https://hooks.slack.com/services/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
+    channel: amp-ci
+    username: amp-drone-ci
+    template: >
+      build {{repo.name}} #{{ build.number }} finished with a {{ build.status }} status. ({{repo.full_name}}/[{{ build.branch }}] @{{build.author}} http://drone.amp.appcelerator.io:8000/{{repo.full_name}} )

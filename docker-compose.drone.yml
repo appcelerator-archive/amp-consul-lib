@@ -1,0 +1,24 @@
+version: "2"
+
+services:
+  # system under test
+  sut:
+    build: .
+    command: "npm run test"
+    environment:
+      DEBUG: app*
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - consul
+
+  # store
+  consul:
+    image: appcelerator/consul:latest-server
+    hostname: consul
+    ports:
+      - "8400:8400"
+      - "8500:8500"
+      - "8600:53/udp"
+    command:
+      [ "-bootstrap"]
