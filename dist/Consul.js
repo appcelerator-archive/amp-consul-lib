@@ -4,39 +4,25 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function() {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[ i ];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) {
-        descriptor.writable = true;
-      }
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function(Constructor, protoProps, staticProps) {
-    if (protoProps) {
-      defineProperties(Constructor.prototype, protoProps);
-    }
-    if (staticProps) {
-      defineProperties(Constructor, staticProps);
-    }
-    return Constructor;
-  };
-}();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _consul = require('consul');
 
 var _consul2 = _interopRequireDefault(_consul);
 
+var _ampLogLib = require('amp-log-lib');
+
+var _ampLogLib2 = _interopRequireDefault(_ampLogLib);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Consul = function() {
+var consul_update = 0;
+var consul_conflict = 0;
+var consul_conflict_freq = [];
+
+var Consul = function () {
   function Consul() {
     _classCallCheck(this, Consul);
 
@@ -48,7 +34,7 @@ var Consul = function() {
     this.client = (0, _consul2.default)(this.options);
   }
 
-  _createClass(Consul, [ {
+  _createClass(Consul, [{
     key: 'set',
     value: function set(id, value) {
       return regeneratorRuntime.async(function set$(_context) {
@@ -105,9 +91,130 @@ var Consul = function() {
         }
       }, null, this);
     }
-  } ]);
+  }, {
+    key: 'set_json',
+    value: function set_json(id, json) {
+      return regeneratorRuntime.async(function set_json$(_context4) {
+        while (1) {
+          switch (_context4.prev = _context4.next) {
+            case 0:
+              _context4.next = 2;
+              return regeneratorRuntime.awrap(this.client.kv.set(id, JSON.stringify(json)));
+
+            case 2:
+            case 'end':
+              return _context4.stop();
+          }
+        }
+      }, null, this);
+    }
+  }, {
+    key: 'get_json',
+    value: function get_json(id) {
+      var r;
+      return regeneratorRuntime.async(function get_json$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              _context5.next = 2;
+              return regeneratorRuntime.awrap(this.client.kv.get(id));
+
+            case 2:
+              r = _context5.sent;
+
+              if (!r) {
+                _context5.next = 5;
+                break;
+              }
+
+              return _context5.abrupt('return', JSON.parse(r.Value));
+
+            case 5:
+              return _context5.abrupt('return', r);
+
+            case 6:
+            case 'end':
+              return _context5.stop();
+          }
+        }
+      }, null, this);
+    }
+
+    // update : allow concurrent update of an object using advisory consul test-and-set strategy
+
+  }, {
+    key: 'update_json',
+    value: function update_json(key, f) {
+      var is_updated, val2, retry, result, val, cas;
+      return regeneratorRuntime.async(function update_json$(_context6) {
+        while (1) {
+          switch (_context6.prev = _context6.next) {
+            case 0:
+              consul_update += 1;
+              is_updated = void 0;
+              val2 = void 0;
+              retry = 0;
+
+            case 4:
+              _context6.next = 6;
+              return regeneratorRuntime.awrap(this.client.kv.get(key));
+
+            case 6:
+              result = _context6.sent;
+              val = null;
+              cas = 0;
+
+              if (result) {
+                val = JSON.parse(result.Value);
+                cas = result.ModifyIndex;
+              }
+              val2 = f(val, key);
+
+              if (val2) {
+                _context6.next = 13;
+                break;
+              }
+
+              return _context6.abrupt('break', 18);
+
+            case 13:
+              _context6.next = 15;
+              return regeneratorRuntime.awrap(this.client.kv.set({ key: key, value: JSON.stringify(val2), cas: cas }));
+
+            case 15:
+              is_updated = _context6.sent;
+
+
+              if (!is_updated) {
+                consul_conflict += 1;
+                retry += 1;
+                _ampLogLib2.default.info({ msgid: "consul conflict", consul_update: consul_update, consul_conflict: consul_conflict, consul_conflict_freq: consul_conflict_freq, key: key });
+                //TODO: add exponential random delay before retry
+              } else {
+                  consul_conflict_freq[retry] = consul_conflict_freq[retry] || 0;
+                  consul_conflict_freq[retry] += 1;
+                }
+
+            case 17:
+              if (!is_updated) {
+                _context6.next = 4;
+                break;
+              }
+
+            case 18:
+              return _context6.abrupt('return', val2);
+
+            case 19:
+            case 'end':
+              return _context6.stop();
+          }
+        }
+      }, null, this);
+    }
+  }]);
 
   return Consul;
 }();
 
 exports.default = Consul;
+//# sourceMappingURL=Consul.js.map

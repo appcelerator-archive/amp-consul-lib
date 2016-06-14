@@ -1,7 +1,11 @@
 import 'babel-polyfill'
-import 'source-map-support/register';
-import assert from 'assert';
-import { Consul } from '..';
+import 'source-map-support/register'
+import assert from 'assert'
+import log from 'amp-log-lib'
+log.init({ name:'amp-consul-test' })
+
+import { Consul } from '..'
+
 
 function sleep(ms) {
   return new Promise((resolve, reject) => {
@@ -9,8 +13,20 @@ function sleep(ms) {
   });
 }
 
+async function incr_unsafe(c, key) {
+  const r = await c.get_json(key)
+  await c.set_json(key, r + 1)
+}
+
+async function incr_safe(c, key) {
+  await c.update_json(key, (r) => {
+    return r + 1
+  })
+}
+
 describe('amp-consul-lib', function() {
   let c = new Consul()
+  const n = 10
   before(async () => {
     console.log ("starting...")
     let ok
@@ -53,5 +69,49 @@ describe('amp-consul-lib', function() {
     assert.equal(result[0].Value, 'val1')
     assert.equal(result[1].Key, 'key1/key2')
     assert.equal(result[1].Value, 'val2')
+  })
+
+  it('should update consul entry (sync/unsafe) -> good', async function() {
+    const key = 'key3'
+    await c.set_json(key, 1)
+    let v = await c.get_json(key)
+    assert.equal(v, 1)
+
+    for (let i = 0; i < n; i++) {
+      await incr_unsafe(c, key)
+    }
+
+    v = await c.get_json(key)
+    assert.equal(v, n + 1)
+  })
+
+  it('should update consul entry (async/unsafe) -> bad', async function() {
+    const key = 'key4'
+    await c.set_json(key, 1)
+    let v = await c.get_json(key)
+    assert.equal(v, 1)
+    let all = []
+    for (let i = 0; i < n; i++) {
+      all.push(incr_unsafe(c, key))
+    }
+    await Promise.all(all)
+
+    v = await c.get_json(key)
+    assert.notEqual(v, n + 1)
+  })
+
+  it('should update consul entry (async/safe) -> good', async function() {
+    const key = 'key4'
+    await c.set_json(key, 1)
+    let v = await c.get_json(key)
+    assert.equal(v, 1)
+    let all = []
+    for (let i = 0; i < n; i++) {
+      all.push(incr_safe(c, key))
+    }
+    await Promise.all(all)
+
+    v = await c.get_json(key)
+    assert.equal(v, n + 1)
   })
 })
