@@ -1,4 +1,3 @@
-import 'babel-polyfill'
 import 'source-map-support/register'
 import assert from 'assert'
 import log from 'amp-log-lib'

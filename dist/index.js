@@ -8,7 +8,7 @@ var _Consul = require('./Consul');
 
 Object.defineProperty(exports, 'Consul', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_Consul).default;
   }
 });
