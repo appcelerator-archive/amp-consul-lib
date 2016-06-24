@@ -1,6 +1,6 @@
 {
   "name": "amp-consul-lib",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "amp-consul-lib",
   "scripts": {
     "prepublish": "npm run build",
@@ -15,7 +15,7 @@
   },
   "main": "dist",
   "dependencies": {
-    "amp-log-lib": "https://github.com/appcelerator/amp-log-lib.git",
+    "amp-log-lib": "https://github.com/jdavanne/amp-log-lib.git#jda-233-refactor-atomiq",
     "atomiq": "^1.0.6",
     "bunyan": "^1.8.1",
     "consul": "^0.25.0",
