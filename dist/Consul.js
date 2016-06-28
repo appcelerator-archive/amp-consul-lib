@@ -4,8 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _consul = require('consul');
 
 var _consul2 = _interopRequireDefault(_consul);
@@ -16,16 +14,14 @@ var _ampLogLib2 = _interopRequireDefault(_ampLogLib);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var consul_update = 0;
-var consul_conflict = 0;
-var consul_conflict_freq = [];
+let consul_update = 0;
+let consul_conflict = 0;
+let consul_conflict_freq = [];
 
-var Consul = function () {
-  function Consul() {
-    _classCallCheck(this, Consul);
-
+class Consul {
+  constructor() {
     this.options = {
       host: 'consul',
       port: '8500',
@@ -34,187 +30,85 @@ var Consul = function () {
     this.client = (0, _consul2.default)(this.options);
   }
 
-  _createClass(Consul, [{
-    key: 'set',
-    value: function set(id, value) {
-      return regeneratorRuntime.async(function set$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.next = 2;
-              return regeneratorRuntime.awrap(this.client.kv.set(id, value));
+  set(id, value) {
+    var _this = this;
 
-            case 2:
-            case 'end':
-              return _context.stop();
-          }
+    return _asyncToGenerator(function* () {
+      yield _this.client.kv.set(id, value);
+    })();
+  }
+
+  get(id) {
+    var _this2 = this;
+
+    return _asyncToGenerator(function* () {
+      return yield _this2.client.kv.get(id);
+    })();
+  }
+
+  delete(id) {
+    var _this3 = this;
+
+    return _asyncToGenerator(function* () {
+      return yield _this3.client.kv.del(id);
+    })();
+  }
+
+  set_json(id, json) {
+    var _this4 = this;
+
+    return _asyncToGenerator(function* () {
+      yield _this4.client.kv.set(id, JSON.stringify(json));
+    })();
+  }
+
+  get_json(id) {
+    var _this5 = this;
+
+    return _asyncToGenerator(function* () {
+      let r = yield _this5.client.kv.get(id);
+      if (r) {
+        return JSON.parse(r.Value);
+      }
+      return r;
+    })();
+  }
+
+  // update : allow concurrent update of an object using advisory consul test-and-set strategy
+  update_json(key, f) {
+    var _this6 = this;
+
+    return _asyncToGenerator(function* () {
+      consul_update += 1;
+      let is_updated;
+      let val2;
+      let retry = 0;
+      do {
+        const result = yield _this6.client.kv.get(key);
+        let val = null;
+        let cas = 0;
+        if (result) {
+          val = JSON.parse(result.Value);
+          cas = result.ModifyIndex;
         }
-      }, null, this);
-    }
-  }, {
-    key: 'get',
-    value: function get(id) {
-      return regeneratorRuntime.async(function get$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              _context2.next = 2;
-              return regeneratorRuntime.awrap(this.client.kv.get(id));
+        val2 = f(val, key);
+        if (!val2) break;
 
-            case 2:
-              return _context2.abrupt('return', _context2.sent);
+        is_updated = yield _this6.client.kv.set({ key, value: JSON.stringify(val2), cas });
 
-            case 3:
-            case 'end':
-              return _context2.stop();
+        if (!is_updated) {
+          consul_conflict += 1;
+          retry += 1;
+          _ampLogLib2.default.info({ msgid: "consul conflict", consul_update, consul_conflict, consul_conflict_freq, key });
+          //TODO: add exponential random delay before retry
+        } else {
+            consul_conflict_freq[retry] = consul_conflict_freq[retry] || 0;
+            consul_conflict_freq[retry] += 1;
           }
-        }
-      }, null, this);
-    }
-  }, {
-    key: 'delete',
-    value: function _delete(id) {
-      return regeneratorRuntime.async(function _delete$(_context3) {
-        while (1) {
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              _context3.next = 2;
-              return regeneratorRuntime.awrap(this.client.kv.del(id));
-
-            case 2:
-              return _context3.abrupt('return', _context3.sent);
-
-            case 3:
-            case 'end':
-              return _context3.stop();
-          }
-        }
-      }, null, this);
-    }
-  }, {
-    key: 'set_json',
-    value: function set_json(id, json) {
-      return regeneratorRuntime.async(function set_json$(_context4) {
-        while (1) {
-          switch (_context4.prev = _context4.next) {
-            case 0:
-              _context4.next = 2;
-              return regeneratorRuntime.awrap(this.client.kv.set(id, JSON.stringify(json)));
-
-            case 2:
-            case 'end':
-              return _context4.stop();
-          }
-        }
-      }, null, this);
-    }
-  }, {
-    key: 'get_json',
-    value: function get_json(id) {
-      var r;
-      return regeneratorRuntime.async(function get_json$(_context5) {
-        while (1) {
-          switch (_context5.prev = _context5.next) {
-            case 0:
-              _context5.next = 2;
-              return regeneratorRuntime.awrap(this.client.kv.get(id));
-
-            case 2:
-              r = _context5.sent;
-
-              if (!r) {
-                _context5.next = 5;
-                break;
-              }
-
-              return _context5.abrupt('return', JSON.parse(r.Value));
-
-            case 5:
-              return _context5.abrupt('return', r);
-
-            case 6:
-            case 'end':
-              return _context5.stop();
-          }
-        }
-      }, null, this);
-    }
-
-    // update : allow concurrent update of an object using advisory consul test-and-set strategy
-
-  }, {
-    key: 'update_json',
-    value: function update_json(key, f) {
-      var is_updated, val2, retry, result, val, cas;
-      return regeneratorRuntime.async(function update_json$(_context6) {
-        while (1) {
-          switch (_context6.prev = _context6.next) {
-            case 0:
-              consul_update += 1;
-              is_updated = void 0;
-              val2 = void 0;
-              retry = 0;
-
-            case 4:
-              _context6.next = 6;
-              return regeneratorRuntime.awrap(this.client.kv.get(key));
-
-            case 6:
-              result = _context6.sent;
-              val = null;
-              cas = 0;
-
-              if (result) {
-                val = JSON.parse(result.Value);
-                cas = result.ModifyIndex;
-              }
-              val2 = f(val, key);
-
-              if (val2) {
-                _context6.next = 13;
-                break;
-              }
-
-              return _context6.abrupt('break', 18);
-
-            case 13:
-              _context6.next = 15;
-              return regeneratorRuntime.awrap(this.client.kv.set({ key: key, value: JSON.stringify(val2), cas: cas }));
-
-            case 15:
-              is_updated = _context6.sent;
-
-
-              if (!is_updated) {
-                consul_conflict += 1;
-                retry += 1;
-                _ampLogLib2.default.info({ msgid: "consul conflict", consul_update: consul_update, consul_conflict: consul_conflict, consul_conflict_freq: consul_conflict_freq, key: key });
-                //TODO: add exponential random delay before retry
-              } else {
-                  consul_conflict_freq[retry] = consul_conflict_freq[retry] || 0;
-                  consul_conflict_freq[retry] += 1;
-                }
-
-            case 17:
-              if (!is_updated) {
-                _context6.next = 4;
-                break;
-              }
-
-            case 18:
-              return _context6.abrupt('return', val2);
-
-            case 19:
-            case 'end':
-              return _context6.stop();
-          }
-        }
-      }, null, this);
-    }
-  }]);
-
-  return Consul;
-}();
-
+      } while (!is_updated);
+      return val2;
+    })();
+  }
+}
 exports.default = Consul;
 //# sourceMappingURL=Consul.js.map

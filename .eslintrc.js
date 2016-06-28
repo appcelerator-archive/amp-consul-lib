@@ -5,7 +5,7 @@ module.exports = {
     "node": true,
     "mocha": true
   },
-  "plugins": [ "eslint-plugin-babel" ],
+  "plugins": ["eslint-plugin-babel"],
   "extends": "eslint:recommended",
   "parserOptions": {
     "sourceType": "module"
@@ -26,10 +26,10 @@ module.exports = {
     "babel/generator-star-spacing": 1,
     "babel/new-cap": 1,
     "babel/array-bracket-spacing": 1,
-    "babel/object-curly-spacing": [ "error", "always", {
+    "babel/object-curly-spacing": ["error", "always", {
       "objectsInObjects": false,
       "arraysInObjects": false
-    } ],
+    }],
     "babel/object-shorthand": 1,
     "babel/arrow-parens": 0,
     "babel/no-await-in-loop": 1,
@@ -219,9 +219,9 @@ module.exports = {
     "require-yield": 2,
     "semi": 0,
     "semi-spacing": 2,
-    "sort-imports": [ 2, {
+    "sort-imports": [2, {
       "ignoreCase": true
-    } ],
+    }],
     "sort-vars": 2,
     "space-before-blocks": 2,
     "space-before-function-paren": 0,
@@ -244,4 +244,4 @@ module.exports = {
       "never"
     ]
   }
-};
+}

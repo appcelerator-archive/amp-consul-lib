@@ -1,1 +1,1 @@
-FROM appcelerator/node:amp
+FROM appcelerator/node:amp-onbuild

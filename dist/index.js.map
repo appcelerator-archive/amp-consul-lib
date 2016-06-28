@@ -1,1 +1,1 @@
-{"version":3,"sources":["index.js"],"names":[],"mappings":";;;;;;;;;;;2CAAS,O","file":"index.js","sourcesContent":["export { default as Consul } from './Consul'\n"]}
+{"version":3,"sources":["../src/index.js"],"names":[],"mappings":";;;;;;;;;;;2CAAS,O","file":"index.js","sourcesContent":["export { default as Consul } from './Consul'\n"]}
